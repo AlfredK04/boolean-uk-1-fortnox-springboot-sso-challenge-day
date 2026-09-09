@@ -1,0 +1,23 @@
+version: "0.5"
+
+processes:
+  createdb:
+    command: "createdb $PGDATABASE || true"
+    depends_on:
+      postgresql:
+        condition: process_healthy
+
+  keycloak:
+    command: 'exec "${DEVBOX_PROJECT_ROOT:-.}/.keycloak/keycloak-$KEYCLOAK_VERSION/bin/kc.sh" start-dev --http-port=$KC_HTTP_PORT'
+    availability:
+      restart: on_failure
+      max_restarts: 3
+    readiness_probe:
+      http_get:
+        scheme: http
+        host: 127.0.0.1
+        port: 8080
+        path: /realms/master
+      initial_delay_seconds: 20
+      period_seconds: 5
+      failure_threshold: 40

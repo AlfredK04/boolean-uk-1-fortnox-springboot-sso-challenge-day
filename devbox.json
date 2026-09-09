@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetify-com/devbox/0.16.0/.schema/devbox.schema.json",
+  "name": "java-devbox-test1",
+  "description": "Java development on any OS. Devbox installs everything, so this works the same on Linux, macOS and Windows (WSL2).",
+
+  "packages": [
+    "temurin-bin@21",
+    "curl",
+    "postman",
+    "redocly",
+    "postgresql@17",
+    "dbeaver-bin",
+    "flyway",
+    "unzip",
+    "spring-boot-cli@latest"
+  ],
+
+  "env": {
+    "JAVA_HOME": "$DEVBOX_PACKAGES_DIR",
+    "PGUSER": "postgres",
+    "PGPORT": "5432",
+    "PGDATABASE": "booleandb",
+    "KEYCLOAK_VERSION": "26.3.0",
+    "KC_HTTP_PORT": "8080",
+    "KC_BOOTSTRAP_ADMIN_USERNAME": "admin",
+    "KC_BOOTSTRAP_ADMIN_PASSWORD": "admin"
+  },
+
+  "shell": {
+    "init_hook": [
+      "test -f \"$PGDATA/PG_VERSION\" || initdb --username=$PGUSER --auth=trust --encoding=UTF8 --locale=C",
+      "test -x \"$DEVBOX_PROJECT_ROOT/.keycloak/keycloak-$KEYCLOAK_VERSION/bin/kc.sh\" || { echo \"Downloading Keycloak $KEYCLOAK_VERSION (one-off, ~130 MB)...\"; mkdir -p \"$DEVBOX_PROJECT_ROOT/.keycloak\"; curl -fL --progress-bar -o \"$DEVBOX_PROJECT_ROOT/.keycloak/keycloak.zip\" \"https://github.com/keycloak/keycloak/releases/download/$KEYCLOAK_VERSION/keycloak-$KEYCLOAK_VERSION.zip\" && unzip -q \"$DEVBOX_PROJECT_ROOT/.keycloak/keycloak.zip\" -d \"$DEVBOX_PROJECT_ROOT/.keycloak\" && rm -f \"$DEVBOX_PROJECT_ROOT/.keycloak/keycloak.zip\" || echo 'Keycloak download failed. Check KEYCLOAK_VERSION in devbox.json.'; }",
+      "java --version"
+    ],
+    "scripts": {
+      "script-test": "echo 'Hello, World!'",
+      "db-shell": "psql",
+      "db-reset": "test -n \"$PGDATA\" && rm -rf \"$PGDATA\" && echo 'Database deleted. Run: devbox services up'",
+      "kc-reset": "rm -rf \"$DEVBOX_PROJECT_ROOT/.keycloak/keycloak-$KEYCLOAK_VERSION/data\" && echo 'Keycloak realms/users deleted. Run: devbox services restart keycloak'",
+      "kc-purge": "rm -rf \"$DEVBOX_PROJECT_ROOT/.keycloak\" && echo 'Keycloak removed. Run: devbox shell'"
+    }
+  }
+}
