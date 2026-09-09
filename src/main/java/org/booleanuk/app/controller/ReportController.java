@@ -28,7 +28,7 @@ public class ReportController {
         return reportService.getProductSales();
     }
 
-    @GetMapping ("orders-by-values")
+    @GetMapping ("orders-by-value")
     public List<OrderValueDto> getOrderByValue() {
         return reportService.getOrdersByValue();
     }
